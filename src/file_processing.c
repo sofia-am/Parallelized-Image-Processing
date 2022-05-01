@@ -1,22 +1,24 @@
 #include "../inc/file_processing.h"
 
-void load_image_to_array(char *image_to_open)
+void load_image_to_array(char *image_to_open, FILE *output, struct image_data data)
 {
    // Variables
     FILE *imagen;
-    FILE *output;
     char *nombre;
     char line[200];
     int x, y;
-    image_data data;
 
     nombre = image_to_open;
-
-    output = fopen("output.txt", "a");
+    //char *string = calloc(40, sizeof(char));
+    //sprintf(string, "[%s]output.txt", image_to_open);
 
     // Abro la imagen
     printf("Abriendo el archivo %s\n", nombre);
     imagen = fopen(nombre, "r");
+    if(!imagen){
+        perror("Error al abrir la imagen");
+        exit(EXIT_FAILURE);
+    }
 
     /*  Nos vamos moviendo entre las 3 primeras líneas
         ya que contiene algunos datos que no nos sirven:
@@ -34,7 +36,7 @@ void load_image_to_array(char *image_to_open)
         data.array[i] = malloc((unsigned long)data.height*sizeof(int));
   
     // Almaceno en un array de 2 dimensiones
-    printf("Leyendo la imagen %s\n", nombre);
+    printf("Procesando la imagen %s\n", nombre);
     x = 0;
     while(x < data.width)
     {
@@ -42,18 +44,12 @@ void load_image_to_array(char *image_to_open)
         while(y < data.height)
         {
             fscanf(imagen, "%d", &data.array[x][y]);
+            fprintf(output, "%d ", data.array[x][y]);
             y++;
         }
+        fprintf(output, "\n");
         x++;
     }
-
-    for(int i = 0; i<data.width; i++){
-        for(int j = 0; j<data.height; j++){
-            fprintf(output, "%d ",data.array[i][j]);
-        }
-        fprintf(output, "\n");
-    }
-
     // Cerramos los files abiertos
     printf("Cerrando el archivo %s\n", nombre);
     fclose(imagen);
