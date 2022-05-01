@@ -55,3 +55,29 @@ void load_image_to_array(char *image_to_open, FILE *output, struct image_data da
     fclose(imagen);
     fclose(output);
 } 
+
+image_data create_distance_map(image_data image, image_data template, image_data window){
+
+    for(int i = 0; i < (image.width - template.width); i++){
+        for(int j = 0; j < (image.height - template.height); j++){
+            for(int n = i; n < (template.width + i); n++){
+                for(int m = j; m < (template.height + j); m++){
+                    window.array[n][m] = image.array[n][m];
+
+                }
+            }
+        }
+    }
+}
+
+void compute_distance(image_data template, image_data window){
+    int sum;
+    for(int i = 0; i < template.width; i++){
+        for(int j = 0; j < template.height; j++){
+            sum += (template.array[i][j] - window.array[i][j]) * (template.array[i][j] - window.array[i][j]);
+        }
+    }
+    int norm = (255*255*template.height*template.height)/255;
+
+    distance = sum/norm;
+}
