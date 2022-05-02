@@ -7,7 +7,7 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
     char line[200];
     int x, y;
     // Abro la imagen
-    printf("Abriendo el archivo %s\n", image_to_open);
+    //printf("Abriendo el archivo %s\n", image_to_open);
     imagen = fopen(image_to_open, "r");
     if (!imagen)
     {
@@ -21,11 +21,16 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
         5745 3830   -> tamaño: ancho alto
         255         -> max pixel value
     */
-    printf("Leyendo la información del header\n");
+    //printf("Leyendo la información del header\n");
     rewind(imagen);
-    fscanf(imagen, "%[^\n]\n", line);
-    fscanf(imagen, "%hu %hu\n", &data->width, &data->height);
-    fscanf(imagen, "%[^\n]\n", line);
+    int status = fscanf(imagen, "%[^\n]\n", line);
+    status = fscanf(imagen, "%hu %hu\n", &data->width, &data->height);
+    status = fscanf(imagen, "%[^\n]\n", line);
+    if (status == -1)
+    {
+        perror("Error leer informacion");
+        exit(EXIT_FAILURE);
+    }
 
     data->array = malloc((size_t)data->width * sizeof(u_int16_t *));
     for (int i = 0; i < data->width; i++)
@@ -39,7 +44,12 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
         y = 0;
         while (y < data->height)
         {
-            fscanf(imagen, "%hu", &data->array[x][y]);
+            status = fscanf(imagen, "%hu", &data->array[x][y]);
+            if (status == -1)
+            {
+                perror("Error leer informacion");
+                exit(EXIT_FAILURE);
+            }
             fprintf(output, "%hu ", data->array[x][y]);
             y++;
         }
@@ -47,9 +57,9 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
         x++;
     }
     // Cerramos los files abiertos
-    printf("Alto x Ancho: %hu %hu\n", data->width, data->height);
+    //printf("Alto x Ancho: %hu %hu\n", data->width, data->height);
 
-    printf("Cerrando el archivo %s\n", image_to_open);
+    //printf("Cerrando el archivo %s\n", image_to_open);
     fclose(imagen);
     fclose(output);
 }
