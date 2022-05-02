@@ -8,14 +8,7 @@ int main(){
     */
     FILE *template_output;
     FILE *image_output;
-    image_data image;
-    image_data template;
-    image_data window;
-
-    // aloco memoria para la estructura
-    window.array = malloc((unsigned long)template.width*sizeof(int*));
-    for(int i = 0 ; i < template.width ; i++)
-        window.array[i] = malloc((unsigned long)template.height*sizeof(int));
+    struct image_data data, template_data;
 
     template_output = fopen("template_output.txt", "a");
     if(!template_output){
@@ -29,9 +22,13 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    char *image_src = "../img/DSC_2337_baw.pgm";
-    char *template_src = "../img/test.pgm";
+    char *imagen = "../img/DSC_2337_baw.pgm";
+    char *template = "../img/test.pgm";
 
-    load_image_to_array(image_src, image_output, image);
-    load_image_to_array(template_src, template_output, template);
+    load_image_to_array(imagen, image_output, data);
+    load_image_to_array(template, template_output, template_data);
+    
+    printf("Imagen: Ancho x Alto: %d x %d\n", data.width, data.height);
+    printf("Template: Ancho x Alto: %d x %d\n", template_data.width, template_data.height);
+
 }
