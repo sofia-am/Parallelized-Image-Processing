@@ -17,13 +17,13 @@ lib_misc.a: file_processing.o
 	ar rcs $(LIB)/$@ $(OBJS)/file_processing.o 
 
 file_processing.o: $(SRC)/file_processing.c $(INC)/file_processing.h
-	$(CC) -c $< $(CFLAGS) -o $(OBJS)/$@
+	$(CC) -c $< $(CFLAGS) -o $(OBJS)/$@ -lm 
 
 main.o: $(SRC)/main.c $(INC)/file_processing.h 
 	$(CC) $(CFLAGS) -c $< -o $(OBJS)/$@
 
 main: main.o lib_misc.a
-	$(CC) $(OBJS)/$< $(LIB)/lib_misc.a -o $(BIN)/$@
+	$(CC) $(OBJS)/$< $(LIB)/lib_misc.a -o $(BIN)/$@ -lm 
 
 #B_client: $(SRC)/B_client.c $(INC)/client_config.h
 #	$(CC) $< $(CFLAGS) -o $(BIN)/$@

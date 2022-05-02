@@ -1,3 +1,7 @@
 /img
 /.vscode
 /.docimg
+/bin
+/obj
+/lib
+juan.c

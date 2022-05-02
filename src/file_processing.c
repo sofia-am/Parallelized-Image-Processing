@@ -1,6 +1,6 @@
 #include "../inc/file_processing.h"
 
-void load_image_to_array(char *image_to_open, FILE *output, struct image_data *data)
+void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
 {
     // Variables
     FILE *imagen;
@@ -24,7 +24,7 @@ void load_image_to_array(char *image_to_open, FILE *output, struct image_data *d
     printf("Leyendo la información del header\n");
     rewind(imagen);
     fscanf(imagen, "%[^\n]\n", line);
-    fscanf(imagen, "%d %d\n", &data->width, &data->height);
+    fscanf(imagen, "%hu %hu\n", &data->width, &data->height);
     fscanf(imagen, "%[^\n]\n", line);
 
     data->array = malloc((size_t)data->width * sizeof(u_int16_t *));
@@ -39,58 +39,64 @@ void load_image_to_array(char *image_to_open, FILE *output, struct image_data *d
         y = 0;
         while (y < data->height)
         {
-            fscanf(imagen, "%d", &data->array[x][y]);
-            fprintf(output, "%d ", data->array[x][y]);
+            fscanf(imagen, "%hu", &data->array[x][y]);
+            fprintf(output, "%hu ", data->array[x][y]);
             y++;
         }
         fprintf(output, "\n");
         x++;
     }
     // Cerramos los files abiertos
-    printf("Alto x Ancho: %d %d\n", data->width, data->height);
+    printf("Alto x Ancho: %hu %hu\n", data->width, data->height);
 
     printf("Cerrando el archivo %s\n", image_to_open);
     fclose(imagen);
     fclose(output);
 }
 
-void create_distance_map(struct image_data *image, struct image_data *template, struct image_data *window, struct image_data *dist)
-{
-    dist->height = (image->height - template->height);
-    dist->width = (image->width - template->width);
-
+void create_distance_map(image_data *image, image_data *template, image_data *window, image_data *dist)
+{   
+    u_int16_t distance;
+    dist->height = (u_int16_t)(image->height - template->height);
+    dist->width = (u_int16_t)(image->width - template->width);
+    //printf("Entré ");
     // recorremos la imagen
     for (int i = 0; i < (image->width - template->width); i++)
     {
         for (int j = 0; j < (image->height - template->height); j++)
         {
+            distance = 0;
             // armamos la ventana con el mismo tamaño del template
-            for (int n = i; n < (template->width + i); n++)
+            for (int n = 0; n < (template->width); n++)
             {
-                for (int m = j; m < (template->height + j); m++)
+                for (int m = 0; m < (template->height); m++)
                 {
                     // creamos una ventana con los elementos de I
-                    window->array[n][m] = image->array[n][m];
+                    window->array[n][m] = image->array[n+i][m+j];
                 }
             }
             // calculamos la distancia entre los pixeles de la ventana con los del template
-            compute_distance(template, window);
+            distance = compute_distance(template, window);
             dist->array[i][j] = distance;
         }
     }
 }
 
-void compute_distance(struct image_data *template, struct image_data *window)
-{
-    int sum;
+u_int16_t compute_distance(image_data *template, image_data *window)
+{   
+    //u_int16_t distance;
+    unsigned int sum = 0;
+    u_int16_t aux = 0;
+    u_int16_t max = 255;
+
     for (int i = 0; i < template->width; i++)
     {
         for (int j = 0; j < template->height; j++)
         {
-            sum += (template->array[i][j] - window->array[i][j]) * (template->array[i][j] - window->array[i][j]);
+            sum += (unsigned int)((template->array[i][j] - window->array[i][j]) * (template->array[i][j] - window->array[i][j]));
         }
     }
-    int norm = (255 * 255 * template->height * template->height) / 255;
-
-    distance = sum / norm;
-}
+    unsigned int norm = (unsigned int)(max * max * template->height * template->height) / max;
+    aux = (u_int16_t)(sum/norm);
+    return aux;
+}   
