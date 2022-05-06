@@ -8,8 +8,10 @@ LIB = lib
 DEP = inc/dependencies.h
 WHERE = -Wl,-rpath,.
 
-all: mkdir main 
+all:  mkdir main #cl
 
+#cl:
+#	rm ./bin/distancia.pgm
 mkdir:
 	mkdir -p $(SRC) $(BIN) $(LIB) $(OBJS) $(INC)
 

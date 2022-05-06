@@ -66,20 +66,29 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
 
 void create_distance_map(image_data *image, image_data *template, image_data *window, image_data *dist)
 {   
-    u_int16_t distance;
+    unsigned int distance = 0;
+    int aux = __INT_MAX__;
+    u_int16_t max = 255;
+    u_int16_t fila_t = 0;
+    u_int16_t column_t = 0;
+    int i, j, m, n;
+    unsigned int norm = (unsigned int)(max * max * template->height * template->width) / max;
     dist->height = (u_int16_t)(image->height - template->height);
     dist->width = (u_int16_t)(image->width - template->width);
     //printf("Entré ");
     // recorremos la imagen
-    for (int i = 0; i < (image->height - template->height); i++)
+    #pragma omp parallel for private(i, j, m, n) num_threads(4);
+
+    for ( i = 0; i < (image->height - template->height); i++)
     {
-        for (int j = 0; j < (image->width - template->width); j++)
+        for ( j = 0; j < (image->width - template->width); j++)
         {
+            //aux = distance;
             distance = 0;
             // armamos la ventana con el mismo tamaño del template
-            for (int n = 0; n < (template->height); n++)
+            for ( n = 0; n < (template->height); n++)
             {
-                for (int m = 0; m < (template->width); m++)
+                for ( m = 0; m < (template->width); m++)
                 {
                     // creamos una ventana con los elementos de I
                     window->array[n][m] = image->array[n+i][m+j];
@@ -87,22 +96,27 @@ void create_distance_map(image_data *image, image_data *template, image_data *wi
             }
             // calculamos la distancia entre los pixeles de la ventana con los del template
             distance = compute_distance(template, window);
-            dist->array[i][j] = distance;
-            if(distance == 0){
-                printf("Minimo: [%d][%d]", (i + template->height/2),  (j + template->width/2));
-                break;
+            dist->array[i][j] = (u_int16_t)(distance/norm);
+            if(distance <= aux){
+                fila_t = (i + template->height/2);
+                column_t = (j + template->width/2);
+                aux = distance;
             }
         }
     }
+    printf("Valor minimo: %d\n", (distance/norm));
+    printf("Minimo [%d][%d]\n", column_t, fila_t);
 }
 
-u_int16_t compute_distance(image_data *template, image_data *window)
+unsigned int compute_distance(image_data *template, image_data *window)
 {   
     //u_int16_t distance;
     unsigned int sum = 0;
+    
+/*     u_int16_t temp = 0;
     u_int16_t aux = 0;
     u_int16_t max = 255;
-
+ */
     for (int i = 0; i < template->height; i++)
     {
         for (int j = 0; j < template->width; j++)
@@ -110,7 +124,5 @@ u_int16_t compute_distance(image_data *template, image_data *window)
             sum += (unsigned int)((template->array[i][j] - window->array[i][j]) * (template->array[i][j] - window->array[i][j]));
         }
     }
-    unsigned int norm = (unsigned int)(max * max * template->height * template->width) / max;
-    aux = (u_int16_t)(sum/norm);
-    return aux;
-}   
+    return sum;
+} 
