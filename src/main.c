@@ -58,8 +58,8 @@ int main(int argc, const char *argv[]){
     rewind(archivo);
     fprintf(archivo, "P2\n");
     fprintf(archivo, "%d %d\n", dist.width, dist.height);
-    for(int i = 0; i < dist.width; i++){
-        for(int j = 0; j < dist.height; j++){
+    for(int i = 0; i < dist.height; i++){
+        for(int j = 0; j < dist.width; j++){
             fprintf(archivo, "%d ", dist.array[i][j]);
         }
         fprintf(archivo, "\n");

@@ -39,10 +39,10 @@ void load_image_to_array(char *image_to_open, FILE *output, image_data *data)
     // Almaceno en un->array de 2 dimensiones
     printf("Procesando la imagen %s\n", image_to_open);
     x = 0;
-    while (x < data->width)
+    while (x < data->height)
     {
         y = 0;
-        while (y < data->height)
+        while (y < data->width)
         {
             status = fscanf(imagen, "%hu", &data->array[x][y]);
             if (status == -1)
@@ -71,15 +71,15 @@ void create_distance_map(image_data *image, image_data *template, image_data *wi
     dist->width = (u_int16_t)(image->width - template->width);
     //printf("Entré ");
     // recorremos la imagen
-    for (int i = 0; i < (image->width - template->width); i++)
+    for (int i = 0; i < (image->height - template->height); i++)
     {
-        for (int j = 0; j < (image->height - template->height); j++)
+        for (int j = 0; j < (image->width - template->width); j++)
         {
             distance = 0;
             // armamos la ventana con el mismo tamaño del template
-            for (int n = 0; n < (template->width); n++)
+            for (int n = 0; n < (template->height); n++)
             {
-                for (int m = 0; m < (template->height); m++)
+                for (int m = 0; m < (template->width); m++)
                 {
                     // creamos una ventana con los elementos de I
                     window->array[n][m] = image->array[n+i][m+j];
@@ -88,6 +88,10 @@ void create_distance_map(image_data *image, image_data *template, image_data *wi
             // calculamos la distancia entre los pixeles de la ventana con los del template
             distance = compute_distance(template, window);
             dist->array[i][j] = distance;
+            if(distance == 0){
+                printf("Minimo: [%d][%d]", (i + template->height/2),  (j + template->width/2));
+                break;
+            }
         }
     }
 }
@@ -99,14 +103,14 @@ u_int16_t compute_distance(image_data *template, image_data *window)
     u_int16_t aux = 0;
     u_int16_t max = 255;
 
-    for (int i = 0; i < template->width; i++)
+    for (int i = 0; i < template->height; i++)
     {
-        for (int j = 0; j < template->height; j++)
+        for (int j = 0; j < template->width; j++)
         {
             sum += (unsigned int)((template->array[i][j] - window->array[i][j]) * (template->array[i][j] - window->array[i][j]));
         }
     }
-    unsigned int norm = (unsigned int)(max * max * template->height * template->height) / max;
+    unsigned int norm = (unsigned int)(max * max * template->height * template->width) / max;
     aux = (u_int16_t)(sum/norm);
     return aux;
 }   
